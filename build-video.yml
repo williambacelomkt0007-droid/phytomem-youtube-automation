@@ -1,0 +1,43 @@
+name: Build narrated video
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate voice and video
+        run: python make_video.py
+
+      - name: Upload video package
+        uses: actions/upload-artifact@v4
+        with:
+          name: phytomem-video
+          path: |
+            output/video.mp4
+            output/narration.mp3
+            output/script.md
+            output/metadata.json
+          if-no-files-found: error
+          retention-days: 7
